@@ -5,7 +5,7 @@ const VAULT_ADDR = config.vault.address;
 const VAULT_TOKEN = config.vault.token;
 const VAULT_SECRET_PATH = config.vault.secretPath;
 
-const vault = {
+const vault = { 
     // Upload function
     upload: async (fileName, fileBuffer) => {
         try {
