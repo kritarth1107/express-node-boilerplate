@@ -96,6 +96,45 @@ app.get("/health", (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+/* ================================
+✅ List API Route
+==================================*/
+app.get("/list", (req, res) => {
+    const routes = [];
+
+    app._router.stack.forEach((middleware) => {
+        if (middleware.route) {
+            // ✅ Directly attached routes
+            const { path } = middleware.route;
+            const method = Object.keys(middleware.route.methods)[0].toUpperCase();
+            routes.push({ method, path });
+
+        } else if (middleware.name === "router") {
+            // ✅ Handle Router-Level Middleware (like `/chain`)
+            const basePath = middleware.regexp
+                .toString()
+                .replace(/^\/\^\\/, "")
+                .replace(/\\\/\?\(\?=\\\/\|\$\)\/\$/, "")
+                .replace(/\\/g, "")
+                .replace(/\?.*/, "");
+
+            middleware.handle.stack.forEach((handler) => {
+                if (handler.route) {
+                    const { path } = handler.route;
+                    const method = Object.keys(handler.route.methods)[0].toUpperCase();
+                    const fullPath = `${basePath}${path}`.replace("//", "/");
+                    routes.push({ method, path: fullPath });
+                }
+            });
+        }
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Available API Routes",
+        routes,
+    });
+});
 
 /* ================================
 ✅ Global Error Handling Middleware
